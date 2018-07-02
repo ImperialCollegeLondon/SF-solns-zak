@@ -1,0 +1,12 @@
+--1 (1)
+def nandb : bool → bool → bool := sorry
+
+--2 (1)
+def andb3 : bool → bool → bool → bool := sorry
+
+--3 (1)
+def factorial : ℕ → ℕ := sorry
+
+--4 (1)
+def blt_nat : ℕ → ℕ → bool := sorry
+
