@@ -8,14 +8,18 @@
 -- x            = -b/2a + S ∨ -b/2a - S 
 
 import tactic.ring
+import tactic.find 
+
+#check id 
+#find _ / _ * _ = _ * _ / _ 
 
 
 
 theorem quad (k : Type) [field k] (a b c x S : k)
 (HS : S*S = b*b - 4*a*c) (char_not_2 : (2:k) ≠ 0) (a_not_0 : a ≠ 0) :
 a * x*x + b * x + c = 0 ↔ 
-(x = (-b + S ) / 2*a ∨ 
- x = (-b - S ) / 2*a ) := begin
+(x = (-b + S ) / (2*a) ∨ 
+ x = (-b - S ) / (2*a)) := begin
 
 split,{sorry},
 {
@@ -40,7 +44,26 @@ split,{sorry},
 
         apply eq_of_mul_eq_mul_right H₂,
         simp [add_mul],
-        mul_
+
+        rw ←mul_div_assoc b (S + - b) (2 * a),
+        rw ←mul_div_assoc,
+        rw ←mul_div_assoc,
+
+        rw div_mul_cancel _ H₂,
+        rw div_mul_cancel _ H₂,
+        
+        apply eq_of_mul_eq_mul_right H₂,
+        simp [add_mul],
+
+        rw ←add_assoc,
+
+        rw div_mul_eq_mul_div,
+rw div_mul_cancel _ H₂,
+ring,
+rw pow_two S,
+rw HS,
+ring
+        -- a * (b/c) = (a*b)/c
 
 
     },{sorry}
