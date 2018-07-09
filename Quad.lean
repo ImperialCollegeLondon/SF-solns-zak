@@ -1,21 +1,6 @@
 import tactic.ring
 import tactic.find 
 
-#print or
-
-theorem tt {k : Type} [field k] (a b : k)
-(H : a = 3 ∨ a = 4) (H₂ : (3:k) = (4:k)):
-a = 4 := begin
-
-cases H,
-{
-    rw H,
-    exact H₂
-},
-{exact H}
-
-end
-
 
 -- mul_left_cancel_iff
 theorem mul_eq_implies_mul_mul {k : Type} [field k] (a b c : k):
