@@ -1,8 +1,10 @@
 import tactic.ring
-import tactic.find 
 
 
--- mul_left_cancel_iff
+-- intermediate lemmas, many of which probably already existed
+-- always made inputs of type k explicit for clarity
+-- naming very random
+
 theorem mul_eq_implies_mul_mul {k : Type} [field k] (a b c : k):
 a=b → a*c = b*c := begin
 intro H, rw H
@@ -17,7 +19,6 @@ theorem move_sides {k : Type} [field k] (a b : k) :
 a + b = 0 → a = - b :=
 begin
 intro H,
---have H₁ := add_eq_implies_add_add a (-b) a,
 have H₁ := @eq_of_add_eq_add_left k _ b a (-b),
 rw H₁, simp, exact H
 end
@@ -42,13 +43,10 @@ a + - (b) = a - b := begin
 refl
 end
 
-theorem sq_eq_implies_eq_or_neg_eq {k : Type} [field k] (a b : k) : -- necessary?
+theorem sq_eq_implies_eq_or_neg_eq {k : Type} [field k] (a b : k) :
 a^2 = b^2 → a = b ∨ a = -b := begin
 
-intro H,-- unfold pow monoid.pow at H, simp at H,
-
---have rearrange_H := move_sides (a*a) (-(b*b)),
---simp at rearrange_H,
+intro H,
 have rearrange_H := @add_eq_of_eq_add_neg k _ (a*a) (-(b*b)) 0,
 simp at rearrange_H,
 
@@ -75,9 +73,6 @@ cases H_zero,
 
 end
 
-#print notation ∨
-#print or
-
 theorem multiply_out_divide {k : Type} [field k] (a b c: k) (H_neq : c ≠ 0) :
 a * c = b → a = b / c := begin
 intro H,
@@ -90,20 +85,6 @@ exact mul_comm c a
 
 end
 
-#print notation ∨ 
-
-example : ∀ P : Prop, ∀ proof : P, P := begin
-intro P,
-intro proof,
-exact proof,
-end
-
-
-theorem prove_or (a b : Prop) (proof_a : a) : a ∨ b := begin
-left,exact proof_a
-end
-
-
 
 
 theorem quad (k : Type) [field k] (a b c x S : k)
@@ -114,31 +95,26 @@ a * x*x + b * x + c = 0 ↔
 
 have H₁  := @eq_zero_or_eq_zero_of_mul_eq_zero _ _ 2 a,
 have H₂  : 2 * a ≠ 0,
-        {
-            intro H₃,
-            cases H₁ H₃,
-            {
-                revert h,
-                exact char_not_2
-            },
-            {
-                revert h, exact a_not_0
-            }
-        },
+{
+    intro H₃,
+    cases H₁ H₃,
+    {
+        revert h,
+        exact char_not_2
+    },
+    {
+        revert h, exact a_not_0
+    }
+},
 
 clear H₁, clear a_not_0,
 
 split,
--- a → b
+-- ax^2 + bx + c = 0 → x=...
 {
     intro H_main,
-    -- x = (-b+S)/2a
-    -- 2ax = -b + S
-    --have H₃ : (4*a*a)*(a * x * x + b * x + c) = (4*a*a)*0,
-    --rw H_main,
-    --simp at H₃,
 
-    have H_1 : (2*a*x + b)^2 = S^2,
+    have H_equate_squares : (2*a*x + b)^2 = S^2,
     {
         rw pow_two,
         rw pow_two,
@@ -184,42 +160,49 @@ split,
         rw pow_two,
 
         rw mul_assoc a x x at H_main,
-        exact H_main,
+        exact H_main
     },
-
-    have H_mul_out_1 := multiply_out_divide x (-b + S) (2*a) H₂,
-    --have H_mul_out_2 := multiply_out_divide x (-b - S) (2*a) H₂,
-
-    rw H_mul_out_1,{left,refl}, clear H_mul_out_1,
-
-    rw mul_comm,
-
-    suffices H_add_b : 2*a*x + b = S,
-    {
-        rw ←H_add_b,simp
-    },
-
-    -- just square both sides
-    -- then exact H_1
-    -- note : another case may appear 
-    -- due to squares etc
 
     have H_sq_eq := sq_eq_implies_eq_or_neg_eq (2 * a * x + b) S,
-    rw H_1 at H_sq_eq, simp at H_sq_eq,
+    rw H_equate_squares at H_sq_eq, simp at H_sq_eq,
     rw add_comm at H_sq_eq,
-    
 
-    sorry
+    cases H_sq_eq,
+    {
+        left,
+        have H_mul_out_1 := multiply_out_divide x (-b + S) (2*a) H₂,
+        rw H_mul_out_1, clear H_mul_out_1,
+        rw mul_comm,
 
-    
+        suffices H_add_b : 2*a*x + b = S,
+        {
+            rw ←H_add_b,simp
+        },
+
+        exact H_sq_eq
+    },
+    {
+        right,
+        have H_mul_out_2 := multiply_out_divide x (-b - S) (2*a) H₂,
+        rw H_mul_out_2, clear H_mul_out_2,
+        rw mul_comm,
+
+        suffices H_add_b : 2*a*x + b = -S,
+        {
+            rw ←add_neg_eq_sub,
+            rw ←H_add_b,simp
+        },
+
+        exact H_sq_eq
+    }
+
 },
-
--- x=... → ax^2...
+-- x=... → ax^2 + bx + c
 {
     intro H,
     cases H,
-    -- case -b + - S
-    repeat --works for cases -b - S and - b + S
+
+    repeat --works for both cases -b - S and - b + S
     {
         subst H,
         
@@ -243,7 +226,6 @@ split,
         rw HS,
         ring
     },
-    -- case -b - s
     
 }
 
